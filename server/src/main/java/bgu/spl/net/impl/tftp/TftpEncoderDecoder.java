@@ -36,6 +36,13 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
                 len = 0;
                 return Arrays.copyOfRange(bytes, 0, 2);
             }
+            else if(bytes[1] == 5){
+                if(len>4 && nextByte==0){
+                    byte[] copy = Arrays.copyOfRange(bytes, 0, len);
+                    len = 0;
+                    return copy;
+                }
+            }
             else if(nextByte == 0){
                 byte[] copy = Arrays.copyOfRange(bytes, 0, len);
                 len = 0;
@@ -48,14 +55,14 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
     @Override
     public byte[] encode(byte[] message) {
         //TODO: implement this
-        return null;
+        return message;
     }
-        private void pushByte(byte nextByte) {
-        if (len >= bytes.length) {
-            bytes = Arrays.copyOf(bytes, len * 2);
-        }
-
-        bytes[len++] = nextByte;
+    
+    private void pushByte(byte nextByte) {
+    if (len >= bytes.length) {
+        bytes = Arrays.copyOf(bytes, len * 2);
+    }
+    bytes[len++] = nextByte;
     }
 
     public static void main(String[] args) {
@@ -64,21 +71,21 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
         byte[] bytes = null;
         bytes = dec.decodeNextByte((byte)0x000);
         System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x003);
+        bytes = dec.decodeNextByte((byte)0x005);
         System.out.println(bytes);
         bytes = dec.decodeNextByte((byte)0x000);
         System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x003);
+        bytes = dec.decodeNextByte((byte)0x007);
+        System.out.println(bytes);
+        bytes = dec.decodeNextByte((byte)0x055);
+        System.out.println(bytes);
+        bytes = dec.decodeNextByte((byte)0x073);
+        System.out.println(bytes);
+        bytes = dec.decodeNextByte((byte)0x065);
+        System.out.println(bytes);
+        bytes = dec.decodeNextByte((byte)0x072);
         System.out.println(bytes);
         bytes = dec.decodeNextByte((byte)0x000);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x001);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x0D7);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x0A6);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x095);
         System.out.println(bytes);
         for(byte b : bytes){
             System.out.println(b);
