@@ -13,6 +13,8 @@ public abstract class BaseServer<T> implements Server<T> {
     private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
+    protected Connections<T> connections = new ConnectionsImpl<>();
+    protected int nextId = 0;
 
     public BaseServer(
             int port,
@@ -27,7 +29,6 @@ public abstract class BaseServer<T> implements Server<T> {
 
     @Override
     public void serve() {
-
         try (ServerSocket serverSock = new ServerSocket(port)) {
 			System.out.println("Server started");
 
@@ -36,12 +37,13 @@ public abstract class BaseServer<T> implements Server<T> {
             while (!Thread.currentThread().isInterrupted()) {
 
                 Socket clientSock = serverSock.accept();
-
+                System.out.println(nextId);
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<T>(
                         clientSock,
                         encdecFactory.get(),
                         protocolFactory.get());
-
+                connections.connect(nextId, handler);
+                handler.protocol.start(nextId++, connections);
                 execute(handler);
             }
         } catch (IOException ex) {

@@ -67,6 +67,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
 
     public static void main(String[] args) {
         // Create a new ByteArrayOutputStream
+        /* 
         TftpEncoderDecoder dec = new TftpEncoderDecoder();
         byte[] bytes = null;
         bytes = dec.decodeNextByte((byte)0x000);
@@ -92,6 +93,6 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
         }
         bytes = dec.decodeNextByte((byte)0x000);
         System.out.println(bytes);
-
+        */
     }
 }

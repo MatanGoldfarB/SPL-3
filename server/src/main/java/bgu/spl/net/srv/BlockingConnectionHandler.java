@@ -9,12 +9,13 @@ import java.net.Socket;
 
 public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
 
-    private final BidiMessagingProtocol<T> protocol;
+    protected final BidiMessagingProtocol<T> protocol;
     private final MessageEncoderDecoder<T> encdec;
     private final Socket sock;
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
+    private String userName="";
 
     public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol) {
         this.sock = sock;
@@ -56,5 +57,13 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             out.write(encdec.encode(msg));
             out.flush();
         } catch (IOException ex) {}
+    }
+
+    public String getUserName(){
+        return userName;
+    }
+
+    public void setUserName(String userName){
+        this.userName=userName;
     }
 }
