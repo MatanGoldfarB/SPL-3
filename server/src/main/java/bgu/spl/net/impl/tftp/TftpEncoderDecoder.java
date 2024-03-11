@@ -64,35 +64,4 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
     }
     bytes[len++] = nextByte;
     }
-
-    public static void main(String[] args) {
-        // Create a new ByteArrayOutputStream
-        /* 
-        TftpEncoderDecoder dec = new TftpEncoderDecoder();
-        byte[] bytes = null;
-        bytes = dec.decodeNextByte((byte)0x000);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x005);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x000);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x007);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x055);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x073);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x065);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x072);
-        System.out.println(bytes);
-        bytes = dec.decodeNextByte((byte)0x000);
-        System.out.println(bytes);
-        for(byte b : bytes){
-            System.out.println(b);
-        }
-        bytes = dec.decodeNextByte((byte)0x000);
-        System.out.println(bytes);
-        */
-    }
 }

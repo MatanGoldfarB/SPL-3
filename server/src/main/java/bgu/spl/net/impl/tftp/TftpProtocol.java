@@ -182,7 +182,7 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
         }
     }
 
-    private int handleACKPacket(byte[] msg){
+    private void handleACKPacket(byte[] msg){
         byte[] response;
         short blockNumber = (short) ((msg[2] << 8) | (msg[3] & 0xFF));
         String directoryFilePathString = "server" + File.separator + "Flies";
@@ -192,8 +192,7 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
                 byte[] fileBytes = Files.readAllBytes(filePath);
                 int min =Math.min(512*(blockNumber), fileBytes.length);
                 if(512*(blockNumber-1)>fileBytes.length){
-                    bcast((byte)1, readFile);
-                    return 0;
+                    return;
                 }
                 sendDataPacket((short)(blockNumber+1), Arrays.copyOfRange(fileBytes, 512*(blockNumber-1), min));
             } catch (IOException e) {
@@ -205,7 +204,6 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
             response = error((byte)1, "file doesn't exist");
             connections.send(connectionId, response);
         }
-        return 0;
     }
 
     private byte[] ack(byte[] blockNumber){
