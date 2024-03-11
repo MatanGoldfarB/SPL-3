@@ -40,8 +40,14 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
         if(message.length>=2){
             if(message[1]==7){
                 //LOGRQ
-                msgData = new String(message, 2, message.length-2, StandardCharsets.UTF_8);
-                logrq(msgData);
+                if(connections.getHandler(this.connectionId).getUserName().equals("")){
+                    msgData = new String(message, 2, message.length-2, StandardCharsets.UTF_8);
+                    logrq(msgData);
+                }
+                else{
+                    byte[] response = error((byte)7, "user already logged in");
+                    connections.send(connectionId, response);
+                }
             }
             else if(!connections.getHandler(this.connectionId).getUserName().equals("")){
                 if(message[1]==8){
@@ -86,7 +92,7 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
         }
         else{
             //Undeifined packet
-            byte[] response = error((byte)0, "Undefined Request");
+            byte[] response = error((byte)4, "Unknown Opcode");
             connections.send(connectionId, response);
         }
     }
