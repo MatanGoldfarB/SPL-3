@@ -8,7 +8,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
     //TODO: Implement here the TFTP encoder and decoder
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
-    private int dataSize = 0;
+    private short dataSize = 0;
 
     @Override
     public byte[] decodeNextByte(byte nextByte) {
@@ -17,7 +17,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
         if (len >= 2) {
             if(bytes[1] == 3){
                 if(len==4){
-                    dataSize = nextByte;
+                    dataSize = (short) ((bytes[2] << 8) | (bytes[3] & 0xFF));
                 }
                 else if(len == dataSize + 6){
                 byte[] copy = Arrays.copyOfRange(bytes, 0, len);
@@ -49,7 +49,7 @@ public class TftpEncoderDecoder implements MessageEncoderDecoder<byte[]> {
                 return copy;
             }
         }
-        return null; //not a line yet
+        return null; //not a message yet
     }
 
     @Override

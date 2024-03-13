@@ -141,20 +141,20 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
         byte[] response;
         String directoryFilePathString = "server" + File.separator + "Flies";
         Path filePath = Paths.get(directoryFilePathString, fileName);
-        if(!Files.exists(filePath)){
+        if(Files.exists(filePath)){
             response = error((byte)5, "file exists");
             connections.send(connectionId, response);
         }
         else{
-            byte[] blockNumber = {0,0};
-            writeFile = fileName;
             try {
                 // Create the file
                 Files.createFile(filePath);
+                byte[] blockNumber = {0,0};
+                writeFile = fileName;
+                connections.send(connectionId, ack(blockNumber));
             } catch (IOException e) {
                 System.err.println("Failed to create file: " + e.getMessage());
             }
-            connections.send(connectionId, ack(blockNumber));
         }
     }
 
@@ -171,44 +171,49 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
     } 
 
     private void handleDataPacket(byte[] msg){
+        String directoryFilePathString = "server" + File.separator + "Flies";
+        Path filePath = Paths.get(directoryFilePathString, writeFile);
         try {
-            System.out.println(msg.length);
-            String directoryFilePathString = "server" + File.separator + "Flies";
-            Path filePath = Paths.get(directoryFilePathString, writeFile);
             byte[] fileData = Arrays.copyOfRange(msg, 6, msg.length);;
             Files.write(filePath, fileData, StandardOpenOption.APPEND);
             byte[] blockNumber = {msg[4], msg[5]};
             connections.send(connectionId, ack(blockNumber));
+            if(msg.length<518){
+                bcast((byte)1, writeFile);
+                writeFile=null;
+            }
         } catch (Exception e) {
             System.err.println("Error appending to a file: " + e.getMessage());
-        }
-        if(msg.length<518){
-            bcast((byte)1, writeFile);
-            writeFile=null;
+            try{
+                Files.delete(filePath);
+                System.out.println("error creating file-deleting file");
+            }catch (IOException f) {}
         }
     }
 
     private void handleACKPacket(byte[] msg){
         byte[] response;
         short blockNumber = (short) ((msg[2] << 8) | (msg[3] & 0xFF));
-        String directoryFilePathString = "server" + File.separator + "Flies";
-        Path filePath = Paths.get(directoryFilePathString, readFile);
-        if(Files.exists(filePath)){
-            try {
-                byte[] fileBytes = Files.readAllBytes(filePath);
-                int min =Math.min(512*(blockNumber), fileBytes.length);
-                if(512*(blockNumber-1)>fileBytes.length){
-                    return;
+        String directoryFilePathString ="Flies";
+        if(readFile!=null){
+            Path filePath = Paths.get(directoryFilePathString, readFile);
+            if(Files.exists(filePath)){
+                try {
+                    byte[] fileBytes = Files.readAllBytes(filePath);
+                    int min =Math.min(512*(blockNumber+1), fileBytes.length);
+                    if(512*(blockNumber)>fileBytes.length){
+                        return;
+                    }
+                    sendDataPacket((short)(blockNumber+1), Arrays.copyOfRange(fileBytes, 512+512*(blockNumber-1), min));
+                } catch (IOException e) {
+                    response = error((byte)2, "file can't be read");
+                    connections.send(connectionId, response);
                 }
-                sendDataPacket((short)(blockNumber+1), Arrays.copyOfRange(fileBytes, 512*(blockNumber-1), min));
-            } catch (IOException e) {
-                response = error((byte)2, "file can't be read");
+            }
+            else{
+                response = error((byte)1, "file doesn't exist");
                 connections.send(connectionId, response);
             }
-        }
-        else{
-            response = error((byte)1, "file doesn't exist");
-            connections.send(connectionId, response);
         }
     }
 
@@ -241,6 +246,7 @@ public class TftpProtocol implements BidiMessagingProtocol<byte[]>  {
                 filesNames.add(fileName.getBytes());
                 filesNames.add(new byte[]{0});
             });
+            
         // Convert ArrayList<byte[]> to byte[]
         int totalLength = filesNames.stream().mapToInt(arr -> arr.length).sum();
         byte[] dataBytes = new byte[totalLength];

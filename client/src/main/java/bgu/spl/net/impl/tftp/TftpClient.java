@@ -22,6 +22,7 @@ public class TftpClient {
             kT.start();
             try {
                 kT.join();
+                listenT.shouldTerminate = true;
                 lT.join(); 
             } catch (InterruptedException ignored) {}
             sock.close();
